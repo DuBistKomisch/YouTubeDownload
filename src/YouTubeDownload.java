@@ -8,7 +8,7 @@ import com.sun.syndication.io.*;
 
 public class YouTubeDownload
 {
-  // config
+  // TODO config
   private static final String agent = "YouTubeDownloader";
   private static final String logFile = "ytdl.log";
   private static final String rssAddress = "http://gdata.youtube.com/feeds/base/users/DuBistKomisch/uploads?alt=rss&orderby=published";
@@ -16,7 +16,7 @@ public class YouTubeDownload
 
   // state
   private static PrintWriter log;
-  private static long lastUpdate = 0;
+  private static long lastUpdate = (new Date()).getTime();
 
   public static void main (String args[])
   {
@@ -31,29 +31,18 @@ public class YouTubeDownload
       System.err.println("failed to open log, terminating");
     }
 
-    Calendar cal = new GregorianCalendar();
-    cal.set(Calendar.YEAR, 2011);
-    lastUpdate = cal.getTime().getTime();
-
     // continually poll
     while (true)
     {
       try
       {
         poll();
+        Thread.sleep(interval);
       }
       catch (Exception e)
       {
         System.err.println("error: " + e.getMessage());
         e.printStackTrace(log);
-      }
-      try
-      {
-      Thread.sleep(interval);
-      }
-      catch (InterruptedException e)
-      {
-        System.err.println("interrupted");
       }
     }
   }
@@ -73,8 +62,11 @@ public class YouTubeDownload
       SyndEntry entry = (SyndEntry)entries.get(i);
       if (entry.getPublishedDate().getTime() > lastUpdate)
       {
+        // found a new video
         lastUpdate = entry.getPublishedDate().getTime();
-        download(getLink((entry.getLink())));
+        String link[] = getLink(entry.getLink());
+        if (link != null)
+          download(link);
       }
     }
   }
@@ -128,7 +120,7 @@ public class YouTubeDownload
       return null;
     }
 
-    // get title, ticket and formats
+    // get id, title and formats
     i = response.indexOf("\"video_id\":") + 13;
     id = response.substring(i, response.indexOf("\"", i)).replaceAll("\\\\/", "/");
     i = response.indexOf("\"title\":") + 10;
@@ -156,6 +148,7 @@ public class YouTubeDownload
           catch (Exception e)
           {
             System.err.println("error: " + e.getMessage());
+            e.printStackTrace(log);
           }
         // get auth signature
         if (format_pair.indexOf("sig") == 0)
@@ -164,6 +157,7 @@ public class YouTubeDownload
         if (format_pair.indexOf("itag") == 0)
           switch (itag = Integer.parseInt(format_pair.substring(5, 7)))
           {
+            // TODO config
             case 22: // MP4 720p
             case 35: // FLV 480p
             case 18: // MP4 360p
@@ -216,15 +210,18 @@ public class YouTubeDownload
 
     public void run ()
     {
-      // do stuff
-      System.err.println("saving \"" + filename + "\"");
+      // perform transfer
+      System.out.println("saving \"" + filename + "\"");
       try (
           InputStream read = new URL(address).openStream();
           ReadableByteChannel in = Channels.newChannel(read);
           FileOutputStream write = new FileOutputStream(filename);
           FileChannel out = write.getChannel())
       {
-        out.transferFrom(in, 0, Integer.MAX_VALUE);
+        long start = (new Date()).getTime();
+        long bytes = out.transferFrom(in, 0, Integer.MAX_VALUE);
+        long duration = ((new Date()).getTime() - start) / 1000;
+        System.out.printf("done \"%s\", %d kB in %d seconds, %d kB/s\n", filename, bytes / 1000, duration, bytes / duration / 1000);
       }
       catch (Exception e)
       {
