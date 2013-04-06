@@ -8,11 +8,11 @@ import com.sun.syndication.io.*;
 
 public class YouTubeDownload
 {
-  // TODO config
+  // config
   private static final String agent = "YouTubeDownloader";
-  private static final String logFile = "ytdl.log";
-  private static final String rssAddress = "http://gdata.youtube.com/feeds/base/users/DuBistKomisch/uploads?alt=rss&orderby=published";
-  private static final int interval = 30 * 60 * 1000;
+  private static String logFile;
+  private static String rssAddress;
+  private static long interval;
 
   // state
   private static PrintWriter log;
@@ -20,6 +20,26 @@ public class YouTubeDownload
 
   public static void main (String args[])
   {
+    // get configuration
+    try
+    {
+      // load properties file
+      Properties prop = new Properties();
+      prop.load(new FileReader(args[0]));
+
+      // take the properties we want, see sample for explanations
+      rssAddress = prop.getProperty("feed");
+      logFile = prop.getProperty("logfile");
+      interval = 1000 * Long.parseLong(prop.getProperty("interval"));
+    }
+    catch (Exception e)
+    {
+      System.err.println("error: " + e.getMessage());
+      System.out.println("invalid or missing configuration file");
+      System.out.println("Usage: java YouTubeDownload <config>");
+      return;
+    }
+
     // start logging
     try
     {
@@ -28,7 +48,7 @@ public class YouTubeDownload
     catch (Exception e)
     {
       System.err.println("error: " + e.getMessage());
-      System.err.println("failed to open log, terminating");
+      System.out.println("failed to open log, terminating");
     }
 
     // continually poll

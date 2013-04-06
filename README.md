@@ -13,9 +13,7 @@ Simply dump the files into a folder and run make.
 Configuration
 =============
 
-At the moment, edit the config values at the start of src/YouTubeDownload.java
-
-Proper configuration is planned.
+Copy sample.properties and fill in the values.
 
 Usage
 =====
