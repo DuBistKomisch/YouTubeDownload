@@ -1,11 +1,9 @@
 JC = javac
-JX = java
 SRC = src
 BIN = bin
 LIB = lib
 CP = -cp ${BIN}:${LIB}:${LIB}/*
 JCARGS = -g ${CP}
-JXARGS = ${CP}
 
 SOURCES = ${wildcard ${SRC}/*.java}
 CLASSES = ${patsubst ${SRC}/%.java,${BIN}/%.class,${SOURCES}}
@@ -14,7 +12,8 @@ CLASSES = ${patsubst ${SRC}/%.java,${BIN}/%.class,${SOURCES}}
 all: ${CLASSES}
 
 # dependencies
-# none
+${BIN}/QuickDownload.class: ${BIN}/Downloader.class
+${BIN}/FeedDownload.class: ${BIN}/Downloader.class
 
 # how to make a .java into a .class
 ${CLASSES}: ${BIN}/%.class:${SRC}/%.java
@@ -24,7 +23,3 @@ ${CLASSES}: ${BIN}/%.class:${SRC}/%.java
 # delete compiled files
 clean:
 	rm -rf ${BIN}
-
-# print total line count (for funz)
-lines:
-	cat ${SOURCES} | wc -l

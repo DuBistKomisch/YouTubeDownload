@@ -13,14 +13,16 @@ Simply dump the files into a folder and run make.
 Configuration
 =============
 
-Copy sample.properties and fill in the values.
+To configure a feed, copy `sample.properties` and fill in the values.
 
 Usage
 =====
 
-Use "./run.sh conf/myconf.properties" to start the service.
+`./quick.sh <link/id>` can be used to download a video from a full link or ID.
 
-If you're on a different platform, take a look at the script
-to see how to invoke Java with the correct classpath.
+Use `./feed.sh conf/myconf.properties` to start the service.
 
-Hit ctrl-c to stop the service.
+If you're on a different platform, take a look at the script to see how to
+invoke Java with the correct classpath.
+
+Hit `ctrl-c` to stop the service.
